@@ -1,0 +1,21 @@
+This is simple Theme ReReadeR tool. It allows to change themes of such
+frameworks like GTK+ or Qt on-the-fly.
+
+This tool is a product of vivisection on the GTK+ and Qt frameworks but it does
+not depends on them. Instead it reproduses some manipulations on the xlib-level
+which causes this two frameworks to reread their config files.
+
+
+Examples:
+
+Pring brief help
+$ themerrr --help
+
+Reread both gtk and qt configs
+$ themerrr
+
+Do not reread gtk config
+$ themerrr --no-gtk
+
+Do not reread qt config
+$ themerrr --no-qt
