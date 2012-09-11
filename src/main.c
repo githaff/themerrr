@@ -31,16 +31,21 @@
 #include "themerrr.h"
 
 void print_help();
+void print_version();
 
 #define OPT_OFF 0
 #define OPT_ON  1
 
+const char VERSION[] = "20120911";
+
 // Command line option flags
-int opt_help = OPT_OFF;
+int opt_help    = OPT_OFF;
+int opt_version = OPT_OFF;
 int opt_no_gtk  = OPT_OFF;
 int opt_no_qt   = OPT_OFF;
 
-struct option longopts[] = {{ "help", no_argument, &opt_help, OPT_ON },
+struct option longopts[] = {{ "help",    no_argument, &opt_help,    OPT_ON },
+                            { "version", no_argument, &opt_version, OPT_ON },
                             { "no-gtk",  no_argument, &opt_no_gtk,  OPT_ON },
                             { "no-qt",   no_argument, &opt_no_qt,   OPT_ON }};
 
@@ -55,6 +60,11 @@ int main(int argc, char *argv[])
     if (opt_help == OPT_ON)
     {
         print_help();
+        return 0;
+    }
+    if (opt_version == OPT_ON)
+    {
+        print_version();
         return 0;
     }
 
@@ -83,4 +93,10 @@ void print_help()
     puts("  -h, --help  Print brief help");
     puts("  --no-gtk    Do not reread gtk config file");
     puts("  --no-qt     Do not reread qt config file");
+}
+
+// Print program version
+void print_version()
+{
+    printf("%s\n", VERSION);
 }
