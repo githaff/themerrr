@@ -36,8 +36,8 @@
 #define TIMESTAMP_SIZE 9
 unsigned char timestamp_buf[TIMESTAMP_SIZE];
 unsigned char *get_stamp();
-uint get_jd(int year, int month, int day);
-uint get_hms(int hour, int min, int sec);
+unsigned int get_jd(int year, int month, int day);
+unsigned int get_hms(int hour, int min, int sec);
 
 
 /* Reread Qt theme from config file
@@ -113,7 +113,7 @@ unsigned char *get_stamp()
 /* Get julian day from gregorian date
  * Return integer representation of specified julian date
  */
-uint get_jd(int year, int month, int day)
+unsigned int get_jd(int year, int month, int day)
 {
     return (1461 * (year + 4800 + (month - 14) / 12)) / 4
            + (367 * (month - 2 - 12 * ((month - 14) / 12))) / 12
@@ -124,7 +124,7 @@ uint get_jd(int year, int month, int day)
 /* Get time
  * Return integer representation of specifiet time (in msecs)
  */
-uint get_hms(int hour, int min, int sec)
+unsigned int get_hms(int hour, int min, int sec)
 {
     return (hour * 3600 + min * 60 + sec) * 1000;
 }
