@@ -2,17 +2,17 @@
  * Themerrr - Theme Rereader Utility
  * Copyright (C) 2012 Dmirty Lavnikevich
  * Contact: haff@midgard.by
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -30,12 +30,13 @@
 
 #include "themerrr.h"
 
-void print_help();
-void print_version();
 
 #define OPT_OFF 0
 #define OPT_ON  1
 
+
+void print_help();
+void print_version();
 const char VERSION[] = "20120911";
 
 // Command line option flags
@@ -53,31 +54,25 @@ struct option longopts[] = {{ "help",    no_argument, &opt_help,    OPT_ON },
 int main(int argc, char *argv[])
 {
     int ret_code = 0;
-    
+
     // Parse command line arguments
     while (getopt_long(argc, argv, "h", longopts, NULL) != -1);
 
-    if (opt_help == OPT_ON)
-    {
+    if (opt_help == OPT_ON) {
         print_help();
         return 0;
     }
-    if (opt_version == OPT_ON)
-    {
+    if (opt_version == OPT_ON) {
         print_version();
         return 0;
     }
 
     // Do reread confings
     if (opt_no_gtk == OPT_OFF)
-    {
         ret_code = reread_config_gtk();
-    }
     if (opt_no_qt == OPT_OFF)
-    {
         ret_code = reread_config_qt();
-    }
-    
+
     return ret_code;
 }
 
