@@ -102,7 +102,7 @@ char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int 
             return result;
         }
 
-        for (int i = 0; i < ret_nchildren; i++) {
+        for (unsigned int i = 0; i < ret_nchildren; i++) {
             if (send_xevent_to_all_recurse(d, xev, ret_children[i], level + 1))
                 found = True;
         }
