@@ -2,17 +2,17 @@
  * Themerrr - Theme Rereader Utility
  * Copyright (C) 2012 Dmirty Lavnikevich
  * Contact: haff@midgard.by
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -36,17 +36,18 @@
 #define TIMESTAMP_SIZE 9
 unsigned char timestamp_buf[TIMESTAMP_SIZE];
 unsigned char *get_stamp();
+uint get_jd(int year, int month, int day);
+uint get_hms(int hour, int min, int sec);
 
 
-// Reread Qt theme from config file
-// Returns 0 - if success
-//         error code - otherwise
+/* Reread Qt theme from config file
+ * Return 0 - if success, otherwise - error code
+ */
 int reread_config_qt()
 {
     // Open display and root window
     Display *d = XOpenDisplay(0);
-    if (!d)
-    {
+    if (!d) {
         fprintf(stderr, "Error: qt: cannot open X11-display\n");
         return 1;
     }
@@ -57,8 +58,7 @@ int reread_config_qt()
     char atom_name[512];
     sprintf(atom_name, "_QT_SETTINGS_TIMESTAMP_%s", XDisplayName(NULL));
     atom_num = XInternAtom(d, atom_name, False);
-    if (atom_num == 0)
-    {
+    if (atom_num == 0) {
         fprintf(stderr, "Error: qt: cannot find atom \"%s\"\n", atom_name);
         return 1;
     }
@@ -79,12 +79,9 @@ int reread_config_qt()
     return 0;
 }
 
-
-uint get_jd(int year, int month, int day);
-uint get_hms(int hour, int min, int sec);
-
-// Get full time stamp
-// Returns piunter to char array of size TIMESTAMP_SIZE
+/* Get full time stamp
+ * Return piunter to char array of size TIMESTAMP_SIZE
+ */
 unsigned char *get_stamp()
 {
     time_t t = time(NULL);
@@ -113,9 +110,9 @@ unsigned char *get_stamp()
     return timestamp_buf;
 }
 
-
-// Get julian day from gregorian date
-// Returns integer representation of specified julian date
+/* Get julian day from gregorian date
+ * Return integer representation of specified julian date
+ */
 uint get_jd(int year, int month, int day)
 {
     return (1461 * (year + 4800 + (month - 14) / 12)) / 4
@@ -124,9 +121,10 @@ uint get_jd(int year, int month, int day)
            + day - 32075;
 }
 
-// Get time
-// Returns integer representation of specifiet time (in msecs)
+/* Get time
+ * Return integer representation of specifiet time (in msecs)
+ */
 uint get_hms(int hour, int min, int sec)
 {
-    return (hour * 3600 + min * 60 + sec)*1000;
+    return (hour * 3600 + min * 60 + sec) * 1000;
 }
