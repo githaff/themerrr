@@ -45,7 +45,6 @@ int send_xevent(Display *d, Window w, XEvent *event)
         }
 
     event->xclient.window = w;
-    printf("win=0x%08lx\n", w);
     result = XSendEvent(d, w, False, NoEventMask, event);
     XSync(d, False);
 
@@ -68,7 +67,6 @@ char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int 
 
     int atom_num;
     atom_num = XInternAtom(d, "WM_STATE", False);
-    printf("atom: %d\n", atom_num);
 
     if (XGetWindowProperty(
             d,                 // Display *display
