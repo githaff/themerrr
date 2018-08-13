@@ -2,17 +2,17 @@
  * Themerrr - Theme Rereader Utility
  * Copyright (C) 2012 Dmirty Lavnikevich
  * Contact: haff@midgard.by
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -33,50 +33,27 @@
 #include "themerrr.h"
 
 
-char send_xevent_to_all_recurse(Display *d, XEvent  *xev, Window w, unsigned int level);
-int send_xevent(Display *d, Window w, XEvent *event);
-
-
-// Reread Gtk+ theme from config file
-// Returns 0 - if success
-//         error code - otherwise
-int reread_config_gtk()
+/* Send an X11 event to a specified window on the specified display
+ */
+int send_xevent(Display *d, Window w, XEvent *event)
 {
-    // Get default display and root window
-    Display *d = XOpenDisplay(0);
-    if (!d)
-    {
-        fprintf(stderr, "Error: gtk+: cannot open X11-display\n");
-        return 1;
-    }
-    Window w = DefaultRootWindow(d);
+    Status result;
 
-    // Get message atom
-    char atom_name[] = "_GTK_READ_RCFILES";
-    int atom_num;
-    atom_num = XInternAtom(d, atom_name, False);
-    if (atom_num == 0)
-    {
-        fprintf(stderr, "Error: gtk+: cannot find atom \"%s\"\n", atom_name);
-        return 1;
-    }
+    if (d == 0)
+        {
+            return False;
+        }
 
-    // Set up our event to send
-    XEvent sev;
-    sev.xclient.type = ClientMessage;
-    sev.xclient.display = d;
-    sev.xclient.format = 8;
-    memset(&sev.xclient.data, 0, sizeof(sev.xclient.data));
-    sev.xclient.message_type = atom_num;
+    event->xclient.window = w;
+    printf("win=0x%08lx\n", w);
+    result = XSendEvent(d, w, False, NoEventMask, event);
+    XSync(d, False);
 
-    // Send 'reread config' event to all
-    send_xevent_to_all_recurse(d, &sev, w, 0);
-    
-    return 0;
+    return result;
 }
 
-
-// Sends a ClientMessage to all toplevel client windows
+/* Send an X event to all toplevel client windows
+ */
 char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int level)
 {
     Atom type = None;
@@ -88,10 +65,10 @@ char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int 
     char send = False;
     char found = False;
     char result = False;
-    int i;
-    
+
     int atom_num;
     atom_num = XInternAtom(d, "WM_STATE", False);
+    printf("atom: %d\n", atom_num);
 
     if (XGetWindowProperty(
             d,                 // Display *display
@@ -106,43 +83,34 @@ char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int 
             &nitems,           // unsigned long *nitems_return
             &after,            // unsigned long *bytes_after_return
             &data)             // unsigned char **prop_return
-        != Success)
-    {
+        != Success) {
         fprintf(stderr, "Error: gtk+: No such property\n");
         return result;
     }
-  
-    if (type)
-    {
+
+    if (type) {
         send = True;
         XFree(data);
-    }
-    else
-    {
-        // OK, we're all set, now let's find some windows to send this to
+    } else {
+        // Ok, we're all set, now let's find some windows to send this to
         if (!XQueryTree(d,
                 w,
                 &ret_root,
                 &ret_parent,
                 &ret_children,
-                &ret_nchildren))
-        {
+                &ret_nchildren)) {
             return result;
         }
 
-        for (i = 0; i < ret_nchildren; i++)
-        {
+        for (int i = 0; i < ret_nchildren; i++) {
             if (send_xevent_to_all_recurse(d, xev, ret_children[i], level + 1))
-            {
                 found = True;
-            }
         }
-        
+
         XFree(ret_children);
     }
 
-    if (send || (!found && (level == 1)))
-    {
+    if (send || (!found && (level == 1))) {
         xev->xclient.window = w;
         send_xevent(d, w, xev);
     }
@@ -152,19 +120,45 @@ char send_xevent_to_all_recurse(Display *d, XEvent *xev, Window w, unsigned int 
     return result;
 }
 
-
-// Send x-event to specified window on specified display
-int send_xevent(Display *d, Window w, XEvent *event)
+/* Custom X11 ClientMessage event
+ * Used for reloading urxvt config
+ */
+int reread_config_generic(char *atom_name)
 {
-    Status result;
+    // Get default display and root window
+    Display *d = XOpenDisplay(0);
+    if (!d) {
+        fprintf(stderr, "Error: gtk+: cannot open X11-display\n");
+        return 1;
+    }
+    Window w = DefaultRootWindow(d);
 
-    if (d == 0)
-    {
-        return False;
+    // Get message atom
+    int atom_num;
+    atom_num = XInternAtom(d, atom_name, False);
+    if (atom_num == 0) {
+        fprintf(stderr, "Error: gtk+: cannot find atom \"%s\"\n", atom_name);
+        return 1;
     }
 
-    result = XSendEvent(d, w, False, NoEventMask, event);
-    XSync(d, False);
- 
-    return result;
+    // Set up our event to send
+    XEvent sev;
+    sev.xclient.type = ClientMessage;
+    sev.xclient.display = d;
+    sev.xclient.format = 32;
+    memset(&sev.xclient.data, 0, sizeof(sev.xclient.data));
+    sev.xclient.message_type = atom_num;
+
+    // Send 'reread config' event to all
+    send_xevent_to_all_recurse(d, &sev, w, 0);
+
+    return 0;
+}
+
+/* Reread Gtk+ theme from a config file
+ * Returns 0 if success, error code - otherwise
+ */
+int reread_config_gtk()
+{
+    return reread_config_generic("_GTK_READ_RCFILES");
 }
